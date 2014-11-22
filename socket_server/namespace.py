@@ -7,6 +7,7 @@ class BaseNamespace(object):
     def __init__(self, server):
         self.server = server
         self.clients = []
+        super(BaseNamespace, self).__init__()
 
     def get_name(self):
         """ Get namespace name """
@@ -63,10 +64,10 @@ class BaseNamespace(object):
                 client.sendMessage(data)
 
 
-class EventNamespace(BaseNamespace):
+class EventMixin(object):
 
     def __init__(self, server):
-        super(EventNamespace, self).__init__(server)
+        super(EventMixin, self).__init__(server)
         self.callbacks = self.register_callbacks()
 
     def register_callbacks(self):
@@ -82,11 +83,14 @@ class EventNamespace(BaseNamespace):
     def _fire_callback(self, client, event, **kwargs):
         """ Check for registered callbacks and fire """
         if event in self.callbacks:
-            self.callbacks[event](client, **kwargs)
+            try:
+                self.callbacks[event](client, **kwargs)
+            except TypeError:
+                pass
 
-    def _parse_inbound_message(self, messsage):
+    def _parse_inbound_message(self, message):
         """ Parse inbound JSON message """
-        payload = json.loads(messsage)
+        payload = json.loads(message)
 
         if 'event' in payload:
             output = payload
