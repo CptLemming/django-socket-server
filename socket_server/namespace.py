@@ -137,10 +137,12 @@ class RoomMixin(EventMixin):
     def register_callbacks(self):
         callbacks = super(RoomMixin, self).register_callbacks()
         callbacks.update({
-            'create_room': self.create_room,
-            'join_room': self.join_room,
-            'leave_room': self.leave_room,
-            'broadcast_room': self.broadcast_room,
+            'room/create': self.create_room,
+            'room/destroy': self.destroy_room,
+            'room/join': self.join_room,
+            'room/leave': self.leave_room,
+            'room/broadcast': self.broadcast_room,
+            'room/peers': self.get_room_peers,
         })
 
         return callbacks
@@ -151,31 +153,58 @@ class RoomMixin(EventMixin):
 
         if name and name not in self.rooms:
             self.rooms[name] = {'name': name, 'clients': {}}
-            self.emit_to(client, 'created_room', name=name)
+            self.emit_to(client, 'room/created', name=name)
 
         if join:
             self.join_room(client, name=name)
+
+    def destroy_room(self, client, **kwargs):
+        name = kwargs.get('name')
+
+
+        if name and name in self.rooms:
+            for key in self.rooms[name]['clients'].keys():
+                room_client = self.rooms[name]['clients'][key]
+                self.leave_room(room_client, name=name)
+            del self.rooms[name]
+            self.emit_to(client, 'room/destroyed', name=name)
+
+    def get_room_peers(self, client, **kwargs):
+        name = kwargs.get('name')
+
+
+        if name and name in self.rooms:
+            clients = []
+            for key in self.rooms[name]['clients'].keys():
+                room_client = self.rooms[name]['clients'][key]
+                clients.append(room_client.peer)
+            self.emit_to(client, 'room/peers', peers=clients)
 
     def join_room(self, client, **kwargs):
         name = kwargs.get('name')
 
         if name and name in self.rooms and not self.rooms[name]['clients'].get(client.peer):
             self.rooms[name]['clients'][client.peer] = client
-            self.emit_to(client, 'joined_room', name=name)
+            self.emit_to(client, 'room/joined', name=name)
 
     def leave_room(self, client, **kwargs):
         name = kwargs.get('name')
+        respond = kwargs.get('respond', True)
 
         if name and name in self.rooms and self.rooms[name]['clients'].get(client.peer):
             del self.rooms[name]['clients'][client.peer]
+            if respond:
+                self.emit_to(client, 'room/left', name=name)
 
     def broadcast_room(self, client, **kwargs):
         name = kwargs.get('name')
         payload = kwargs.get('payload')
+        exclude = kwargs.get('exclude', True)
 
         if name and name in self.rooms:
             for key in self.rooms[name]['clients'].keys():
                 room_client = self.rooms[name]['clients'][key]
-                if room_client.peer != client.peer:
+                if not exclude or room_client.peer != client.peer:
+                    print 'Submit payload', payload
                     self.emit_to(
-                        room_client, 'broadcast_room', name=name, payload=payload)
+                        room_client, 'room/broadcast', name=name, payload=payload)

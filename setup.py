@@ -20,13 +20,14 @@ if sys.argv[-1] == 'publish':
     print("  git push --tags")
     sys.exit()
 
-readme = open('README.md').read()
+readme = open('README.rst').read()
+history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 setup(
     name='django-socket-server',
     version=version,
-    description="""Socket Server for Django applications""",
-    long_description=readme,
+    description="""Django Socket Server""",
+    long_description=readme + '\n\n' + history,
     author='Ashley Wilson',
     author_email='scifilem@gmail.com',
     url='https://github.com/CptLemming/django-socket-server',
@@ -52,5 +53,7 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
     ],
 )
