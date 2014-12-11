@@ -94,5 +94,5 @@ The full documentation is at https://django-socket-server.readthedocs.org.
 Links
 -----
 
-- [Autobahn Python](https://github.com/tavendo/AutobahnPython)
-- [Twisted](https://twistedmatrix.com/trac/)
+- `Autobahn Python  <https://github.com/tavendo/AutobahnPython>`_
+- `Twisted <https://twistedmatrix.com/trac/>`_
