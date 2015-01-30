@@ -43,10 +43,6 @@ class SocketServerProtocol(WebSocketServerProtocol):
             namespace.client_disconnected(self)
 
     def onClose(self, wasClean, code, reason):
-        # namespaces = self.factory.getNamespaces()
-        # for key in namespaces.keys():
-        #     namespace = namespaces[key]
-        #     namespace.on_stop(code, reason)
         pass
 
 
@@ -70,3 +66,9 @@ class SocketServerFactory(WebSocketServerFactory):
 
     def getNamespaces(self):
         return self.namespaces
+
+    def stopFactory(self):
+        namespaces = self.getNamespaces()
+        for key in namespaces.keys():
+            namespace = namespaces[key]
+            namespace.on_stop('500', 'SHUTDOWN')
