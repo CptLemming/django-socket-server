@@ -86,6 +86,7 @@ class EventMixin(object):
             try:
                 self.callbacks[event](client, **kwargs)
             except TypeError:
+                print 'An Error occurred calling event [%s]' % event
                 pass
 
     def _parse_inbound_message(self, message):
@@ -161,17 +162,17 @@ class RoomMixin(EventMixin):
     def destroy_room(self, client, **kwargs):
         name = kwargs.get('name')
 
-
         if name and name in self.rooms:
             for key in self.rooms[name]['clients'].keys():
                 room_client = self.rooms[name]['clients'][key]
                 self.leave_room(room_client, name=name)
             del self.rooms[name]
             self.emit_to(client, 'room/destroyed', name=name)
+        else:
+            self.emit_to(client, 'room/error', message='Room %s does not exist' % name)
 
     def get_room_peers(self, client, **kwargs):
         name = kwargs.get('name')
-
 
         if name and name in self.rooms:
             clients = []
@@ -179,6 +180,8 @@ class RoomMixin(EventMixin):
                 room_client = self.rooms[name]['clients'][key]
                 clients.append(room_client.peer)
             self.emit_to(client, 'room/peers', peers=clients)
+        else:
+            self.emit_to(client, 'room/error', message='Room %s does not exist' % name)
 
     def join_room(self, client, **kwargs):
         name = kwargs.get('name')
@@ -186,6 +189,8 @@ class RoomMixin(EventMixin):
         if name and name in self.rooms and not self.rooms[name]['clients'].get(client.peer):
             self.rooms[name]['clients'][client.peer] = client
             self.emit_to(client, 'room/joined', name=name)
+        else:
+            self.emit_to(client, 'room/error', message='Room %s does not exist' % name)
 
     def leave_room(self, client, **kwargs):
         name = kwargs.get('name')
@@ -205,6 +210,7 @@ class RoomMixin(EventMixin):
             for key in self.rooms[name]['clients'].keys():
                 room_client = self.rooms[name]['clients'][key]
                 if not exclude or room_client.peer != client.peer:
-                    print 'Submit payload', payload
                     self.emit_to(
                         room_client, 'room/broadcast', name=name, payload=payload)
+        else:
+            self.emit_to(client, 'room/error', message='Room %s does not exist' % name)
