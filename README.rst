@@ -89,7 +89,7 @@ The above example would expose the following: `ws://localhost:3000/pingpong`
 Documentation
 -------------
 
-The full documentation is at https://django-socket-server.readthedocs.org.
+The full documentation is at https://django-socket-server.readthedocs.io.
 
 Links
 -----
