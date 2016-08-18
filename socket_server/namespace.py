@@ -1,4 +1,6 @@
 import json
+import logging
+logger = logging.getLogger(__name__)
 
 
 class BaseNamespace(object):
@@ -86,7 +88,7 @@ class EventMixin(object):
             try:
                 self.callbacks[event](client, **kwargs)
             except TypeError:
-                print 'An Error occurred calling event [%s]' % event
+                logger.error('An Error occurred calling event [%s]' % event)
                 pass
 
     def _parse_inbound_message(self, message):
