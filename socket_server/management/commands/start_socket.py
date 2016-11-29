@@ -1,3 +1,5 @@
+import logging
+
 from optparse import make_option
 
 from django.core.management.base import BaseCommand
@@ -7,6 +9,7 @@ from django.conf import settings
 from socket_server.server import SocketServerFactory
 
 namespaces = dict()
+logger = logging.getLogger(__name__)
 
 for app in settings.INSTALLED_APPS:
     try:
@@ -41,7 +44,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         options.update({'port': 3000})
-        print 'Listening on port localhost:%s' % options['port']
+        logger.info('Listening on port localhost:%s' % options['port'])
 
         import sys
 
