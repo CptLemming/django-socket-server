@@ -7,22 +7,23 @@ test_django-socket-server
 
 Tests for `django-socket-server` models module.
 """
-
-import os
-import shutil
+from io import StringIO
 
 from django.test import TestCase
+from django.core.management import call_command
 
-from socket_server import models
+from socket_server.models import SocketLog
 
 
 class TestSocket_server(TestCase):
 
-    def setUp(self):
-        pass
 
-    def test_something(self):
-        pass
+    def test_model(self):
+        log = SocketLog(content='test log entry')
+        log.save()
+        self.assertTrue(log)
 
-    def tearDown(self):
-        pass
+    def test_command(self):
+        out = StringIO()
+        call_command('start_socket', stdout=out, test=0)
+        self.assertTrue(True)

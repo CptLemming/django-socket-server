@@ -1,7 +1,10 @@
-from optparse import make_option
+import os
+import sys
+import time
+import signal
+from importlib import import_module
 
 from django.core.management.base import BaseCommand
-from django.utils.importlib import import_module
 from django.conf import settings
 
 from socket_server.server import SocketServerFactory
@@ -38,10 +41,13 @@ class Command(BaseCommand):
     #         type='int',
     #         help='Port used for incomings websocket requests default to 3000',)
     # )
-
+    
+    def add_arguments(self, parser):
+        parser.add_argument('--test',action='store_true',help='Start server and close it')
+    
     def handle(self, *args, **options):
         options.update({'port': 3000})
-        print 'Listening on port localhost:%s' % options['port']
+        print('Listening on port localhost:%s' % options['port'])
 
         import sys
 
@@ -50,8 +56,16 @@ class Command(BaseCommand):
 
         log.startLogging(sys.stdout)
 
-        factory = SocketServerFactory("ws://localhost:%s" % options['port'], debug=False)
+        factory = SocketServerFactory("ws://localhost:%s" % options['port'])
         factory.setNamespaces(namespaces)
 
         reactor.listenTCP(options['port'], factory)
-        reactor.run()
+        if 'test' in options and options['test']:
+            r = os.fork()
+            if r == 0:
+                reactor.run()
+            else:
+                os.kill(r, signal.SIGKILL)
+                os.waitpid(r,0)
+        else:
+            reactor.run()
