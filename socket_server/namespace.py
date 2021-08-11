@@ -86,8 +86,7 @@ class EventMixin(object):
             try:
                 self.callbacks[event](client, **kwargs)
             except TypeError:
-                print 'An Error occurred calling event [%s]' % event
-                pass
+                print('An Error occurred calling event [%s]' % event)
 
     def _parse_inbound_message(self, message):
         """ Parse inbound JSON message """

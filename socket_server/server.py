@@ -1,5 +1,3 @@
-import json
-
 from autobahn.twisted.websocket import WebSocketServerProtocol, WebSocketServerFactory
 
 from .exceptions import NamespaceNotFound
